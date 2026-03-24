@@ -2,8 +2,8 @@
 
 @theme inline {
   --color-arcade-dark: #0a0a0f;
-  --color-arcade-darker: #06060a;
-  --color-arcade-card: #12121a;
+  --color-arcade-darker: #05050a;
+  --color-arcade-card: #111118;
   --color-arcade-card-hover: #16161f;
   --color-arcade-border: #1e1e2e;
   --color-arcade-purple: #a855f7;
@@ -13,17 +13,23 @@
   --color-arcade-yellow: #eab308;
   --color-arcade-orange: #f97316;
   --color-arcade-muted: #71717a;
-  --font-sans: var(--font-geist-sans);
+  --font-pixel: var(--font-press-start);
   --font-mono: var(--font-geist-mono);
 }
 
+/* --- Base --- */
 body {
   background: var(--color-arcade-dark);
   color: #e4e4e7;
   font-family: var(--font-mono), ui-monospace, monospace;
 }
 
-/* Scanline overlay for retro feel */
+/* --- Pixel font utility --- */
+.font-pixel {
+  font-family: var(--font-pixel), monospace;
+}
+
+/* --- Scanline overlay --- */
 .scanlines {
   position: relative;
 }
@@ -35,41 +41,142 @@ body {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.06) 2px,
-    rgba(0, 0, 0, 0.06) 4px
+    rgba(0, 0, 0, 0.05) 2px,
+    rgba(0, 0, 0, 0.05) 4px
   );
   pointer-events: none;
   border-radius: inherit;
 }
 
-/* Glow effect for neon text */
+/* --- CRT screen effect for game canvases --- */
+.crt-screen {
+  position: relative;
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(0, 0, 0, 0.3);
+}
+.crt-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* --- Neon text glows --- */
 .neon-glow {
   text-shadow:
-    0 0 7px rgba(168, 85, 247, 0.6),
-    0 0 20px rgba(168, 85, 247, 0.4),
-    0 0 40px rgba(168, 85, 247, 0.2);
+    0 0 7px rgba(168, 85, 247, 0.7),
+    0 0 20px rgba(168, 85, 247, 0.5),
+    0 0 40px rgba(168, 85, 247, 0.25),
+    0 0 80px rgba(168, 85, 247, 0.1);
+}
+.neon-glow-green {
+  text-shadow:
+    0 0 7px rgba(34, 197, 94, 0.7),
+    0 0 20px rgba(34, 197, 94, 0.5),
+    0 0 40px rgba(34, 197, 94, 0.25);
+}
+.neon-glow-cyan {
+  text-shadow:
+    0 0 7px rgba(6, 182, 212, 0.7),
+    0 0 20px rgba(6, 182, 212, 0.5),
+    0 0 40px rgba(6, 182, 212, 0.25);
+}
+.neon-glow-pink {
+  text-shadow:
+    0 0 7px rgba(236, 72, 153, 0.7),
+    0 0 20px rgba(236, 72, 153, 0.5),
+    0 0 40px rgba(236, 72, 153, 0.25);
 }
 
-/* Animated gradient background for hero */
+/* --- Neon button base --- */
+.neon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--font-pixel), monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0.5rem;
+  border: 1.5px solid;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.neon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.neon-btn-purple {
+  color: var(--color-arcade-purple);
+  border-color: rgba(168, 85, 247, 0.5);
+  background: rgba(168, 85, 247, 0.1);
+}
+.neon-btn-purple:hover:not(:disabled) {
+  background: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3), inset 0 0 15px rgba(168, 85, 247, 0.05);
+}
+
+.neon-btn-green {
+  color: var(--color-arcade-green);
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.1);
+}
+.neon-btn-green:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.2);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.3), inset 0 0 15px rgba(34, 197, 94, 0.05);
+}
+
+.neon-btn-cyan {
+  color: var(--color-arcade-cyan);
+  border-color: rgba(6, 182, 212, 0.5);
+  background: rgba(6, 182, 212, 0.1);
+}
+.neon-btn-cyan:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.2);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3), inset 0 0 15px rgba(6, 182, 212, 0.05);
+}
+
+.neon-btn-pink {
+  color: var(--color-arcade-pink);
+  border-color: rgba(236, 72, 153, 0.5);
+  background: rgba(236, 72, 153, 0.1);
+}
+.neon-btn-pink:hover:not(:disabled) {
+  background: rgba(236, 72, 153, 0.2);
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.3), inset 0 0 15px rgba(236, 72, 153, 0.05);
+}
+
+/* --- Hero gradient --- */
 .hero-gradient {
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(236, 72, 153, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(236, 72, 153, 0.07) 0%, transparent 50%);
 }
 
-/* Grid dot pattern */
+/* --- Dot grid background --- */
 .dot-grid {
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
-/* Thumbnail scene styles */
+/* --- Thumbnail --- */
 .thumbnail-scene {
   image-rendering: pixelated;
 }
 
-/* Play button pulse */
+/* --- Animations --- */
 @keyframes play-ping {
   0% { transform: scale(1); opacity: 0.8; }
   75% { transform: scale(1.8); opacity: 0; }
@@ -79,7 +186,6 @@ body {
   animation: play-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Marquee flicker for title */
 @keyframes flicker {
   0%, 100% { opacity: 1; }
   92% { opacity: 1; }
@@ -92,8 +198,43 @@ body {
   animation: flicker 4s ease-in-out infinite;
 }
 
-/* Star twinkle */
 @keyframes twinkle {
   0%, 100% { opacity: 0.2; }
   50% { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-enter {
+  animation: modal-in 0.3s ease-out;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: rgba(168, 85, 247, 0.3); }
+  50% { border-color: rgba(168, 85, 247, 0.6); }
+}
+.pulse-border {
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+/* --- Neon input --- */
+.neon-input {
+  background: var(--color-arcade-darker);
+  border: 1.5px solid rgba(168, 85, 247, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.875rem;
+  color: white;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.neon-input::placeholder {
+  color: var(--color-arcade-muted);
+}
+.neon-input:focus {
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.15), inset 0 0 15px rgba(168, 85, 247, 0.03);
 }
