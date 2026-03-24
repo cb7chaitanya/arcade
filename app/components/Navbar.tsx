@@ -23,7 +23,7 @@ export default function Navbar() {
             Games
           </Link>
           <Link
-            href="/"
+            href="/leaderboard"
             className="text-xs uppercase tracking-widest text-arcade-muted hover:text-white transition-colors hidden sm:block"
           >
             Leaderboard

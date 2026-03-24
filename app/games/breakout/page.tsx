@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ScoreSubmit from "../../components/ScoreSubmit";
 import {
   CANVAS_H,
   CANVAS_W,
@@ -24,6 +25,7 @@ export default function BreakoutPage() {
   const [lives, setLives] = useState(3);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const draw = useCallback(() => {
     const ctx = canvasRef.current?.getContext("2d");
@@ -108,6 +110,7 @@ export default function BreakoutPage() {
     setLives(3);
     setGameOver(false);
     setWon(false);
+    setSubmitted(false);
     draw();
   }, [draw]);
 
@@ -167,6 +170,16 @@ export default function BreakoutPage() {
               className="block w-full h-auto cursor-none"
             />
           </div>
+
+          {/* Score submission */}
+          {(gameOver || won) && score > 0 && !submitted && (
+            <ScoreSubmit
+              game="breakout"
+              score={score}
+              color="purple"
+              onSubmitted={() => setSubmitted(true)}
+            />
+          )}
         </div>
       </div>
     </div>

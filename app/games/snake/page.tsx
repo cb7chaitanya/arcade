@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ScoreSubmit from "../../components/ScoreSubmit";
 import {
   CANVAS_SIZE,
   createInitialState,
@@ -21,6 +22,7 @@ export default function SnakePage() {
   const [highScore, setHighScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [started, setStarted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   // Load persisted high score
   useEffect(() => {
@@ -88,6 +90,7 @@ export default function SnakePage() {
     setScore(0);
     setGameOver(false);
     setStarted(false);
+    setSubmitted(false);
     draw();
   }, [draw]);
 
@@ -150,6 +153,16 @@ export default function SnakePage() {
           <p className="text-center text-arcade-muted text-xs uppercase tracking-widest mt-4 sm:hidden">
             Use a keyboard to play
           </p>
+
+          {/* Score submission */}
+          {gameOver && score > 0 && !submitted && (
+            <ScoreSubmit
+              game="snake"
+              score={score}
+              color="green"
+              onSubmitted={() => setSubmitted(true)}
+            />
+          )}
         </div>
       </div>
     </div>

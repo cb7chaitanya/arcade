@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ScoreSubmit from "../../components/ScoreSubmit";
 import {
   CANVAS_H,
   CANVAS_W,
@@ -22,6 +23,7 @@ export default function PongPage() {
   const [playerScore, setPlayerScore] = useState(0);
   const [aiScore, setAiScore] = useState(0);
   const [winner, setWinner] = useState<"player" | "ai" | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const draw = useCallback(() => {
     const ctx = canvasRef.current?.getContext("2d");
@@ -78,6 +80,7 @@ export default function PongPage() {
     setPlayerScore(0);
     setAiScore(0);
     setWinner(null);
+    setSubmitted(false);
     draw();
   }, [draw]);
 
@@ -143,6 +146,16 @@ export default function PongPage() {
             <span>Player</span>
             <span>AI</span>
           </div>
+
+          {/* Score submission — only when player wins */}
+          {winner === "player" && !submitted && (
+            <ScoreSubmit
+              game="pong"
+              score={playerScore}
+              color="cyan"
+              onSubmitted={() => setSubmitted(true)}
+            />
+          )}
         </div>
       </div>
     </div>
