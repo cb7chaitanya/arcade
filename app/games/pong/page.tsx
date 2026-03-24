@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import ScoreSubmit from "../../components/ScoreSubmit";
+import GameOverModal from "../../components/GameOverModal";
+import {
+  playGameOver,
+  playPaddleHit,
+  playScorePoint,
+  playWallBounce,
+  playWin,
+} from "../../lib/sounds";
 import {
   CANVAS_H,
   CANVAS_W,
@@ -23,6 +30,7 @@ export default function PongPage() {
   const [playerScore, setPlayerScore] = useState(0);
   const [aiScore, setAiScore] = useState(0);
   const [winner, setWinner] = useState<"player" | "ai" | null>(null);
+  const [started, setStarted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const draw = useCallback(() => {
@@ -30,7 +38,6 @@ export default function PongPage() {
     if (ctx) render(ctx, stateRef.current);
   }, []);
 
-  // Game loop — uses delta time so speed is frame-rate independent
   useEffect(() => {
     function loop(time: number) {
       rafRef.current = requestAnimationFrame(loop);
@@ -42,9 +49,34 @@ export default function PongPage() {
       const next = tick(prev, dt);
       stateRef.current = next;
 
-      if (next.playerScore !== prev.playerScore) setPlayerScore(next.playerScore);
-      if (next.aiScore !== prev.aiScore) setAiScore(next.aiScore);
-      if (next.winner !== prev.winner) setWinner(next.winner);
+      // Sound: paddle hits (ballVX sign flip)
+      if (prev.ballVX < 0 && next.ballVX > 0) playPaddleHit();
+      if (prev.ballVX > 0 && next.ballVX < 0) playPaddleHit();
+      // Sound: wall bounce (ballVY sign flip, ballVX same)
+      if (
+        Math.sign(prev.ballVY) !== Math.sign(next.ballVY) &&
+        Math.sign(prev.ballVX) === Math.sign(next.ballVX) &&
+        next.ballVY !== 0
+      ) playWallBounce();
+
+      if (next.playerScore > prev.playerScore) {
+        setPlayerScore(next.playerScore);
+        playScorePoint();
+      } else if (next.playerScore !== prev.playerScore) {
+        setPlayerScore(next.playerScore);
+      }
+      if (next.aiScore > prev.aiScore) {
+        setAiScore(next.aiScore);
+        playScorePoint();
+      } else if (next.aiScore !== prev.aiScore) {
+        setAiScore(next.aiScore);
+      }
+      if (next.winner !== null && prev.winner === null) {
+        setWinner(next.winner);
+        if (next.winner === "player") playWin();
+        else playGameOver();
+      }
+      if (next.started && !prev.started) setStarted(true);
 
       draw();
     }
@@ -57,7 +89,6 @@ export default function PongPage() {
     };
   }, [draw]);
 
-  // Keyboard
   useEffect(() => {
     function onDown(e: KeyboardEvent) {
       if (["ArrowUp", "ArrowDown"].includes(e.key)) e.preventDefault();
@@ -80,82 +111,83 @@ export default function PongPage() {
     setPlayerScore(0);
     setAiScore(0);
     setWinner(null);
+    setStarted(false);
     setSubmitted(false);
     draw();
   }, [draw]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-arcade-muted hover:text-white text-sm uppercase tracking-widest mb-8 transition-colors"
+        className="inline-flex items-center gap-2 text-arcade-muted hover:text-white font-pixel text-[9px] uppercase tracking-widest mb-8 transition-colors"
       >
         <span>&larr;</span>
-        <span>Back to Games</span>
+        <span>Games</span>
       </Link>
 
-      <div className="bg-arcade-card border border-arcade-cyan/30 rounded-lg p-6 sm:p-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-arcade-cyan/10 rounded-lg flex items-center justify-center text-2xl">
-            🏓
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold uppercase tracking-wider text-arcade-cyan">
-              Pong
-            </h1>
-            <p className="text-arcade-muted text-sm">
-              W/S or Arrow keys — first to 5 wins
+      {/* Game header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🏓</span>
+          <h1 className="font-pixel text-sm uppercase tracking-wider text-arcade-cyan neon-glow-cyan">
+            Pong
+          </h1>
+        </div>
+        <p className="text-arcade-muted text-[9px] font-pixel uppercase tracking-wider hidden sm:block">
+          W/S or Arrows
+        </p>
+      </div>
+
+      {/* Score bar */}
+      <div className="flex items-center gap-6 mb-4 font-pixel text-[9px] uppercase tracking-wider">
+        <span className="text-arcade-muted">
+          You <span className="text-arcade-cyan">{playerScore}</span>
+        </span>
+        <span className="text-arcade-muted">-</span>
+        <span className="text-arcade-muted">
+          AI <span className="text-arcade-pink">{aiScore}</span>
+        </span>
+        <span className="text-arcade-muted ml-auto hidden sm:inline">First to 5</span>
+      </div>
+
+      {/* Canvas container */}
+      <div className="relative max-w-[600px] mx-auto">
+        <div className="relative border-2 border-arcade-border rounded-xl overflow-hidden crt-screen scanlines">
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_W}
+            height={CANVAS_H}
+            className="block w-full h-auto"
+          />
+        </div>
+
+        {/* Game over modal */}
+        <GameOverModal
+          show={winner !== null}
+          title={winner === "player" ? "You Win!" : "AI Wins"}
+          subtitle={`${playerScore} - ${aiScore}`}
+          score={playerScore}
+          game="pong"
+          color="cyan"
+          submitted={submitted}
+          onSubmitted={() => setSubmitted(true)}
+          onRestart={restart}
+        />
+
+        {/* Start hint */}
+        {!started && !winner && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl z-10">
+            <p className="font-pixel text-[10px] text-arcade-cyan neon-glow-cyan uppercase tracking-wider animate-pulse">
+              Press W/S to start
             </p>
           </div>
-        </div>
+        )}
 
-        {/* Score bar */}
-        <div className="flex items-center justify-between mb-4 px-1 text-sm uppercase tracking-widest">
-          <div className="flex items-center gap-4">
-            <span className="text-arcade-muted">
-              You: <span className="text-arcade-cyan font-bold">{playerScore}</span>
-            </span>
-            <span className="text-arcade-muted">
-              AI: <span className="text-arcade-pink font-bold">{aiScore}</span>
-            </span>
-          </div>
-          {winner && (
-            <button
-              onClick={restart}
-              className="px-4 py-1.5 bg-arcade-cyan/15 border border-arcade-cyan/40 rounded text-arcade-cyan text-xs uppercase tracking-widest hover:bg-arcade-cyan/25 transition-colors"
-            >
-              Restart
-            </button>
-          )}
-        </div>
-
-        {/* Canvas */}
-        <div className="relative max-w-[600px] mx-auto">
-          <div className="relative border border-arcade-border rounded-lg overflow-hidden scanlines">
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_W}
-              height={CANVAS_H}
-              className="block w-full h-auto"
-            />
-          </div>
-
-          {/* Labels */}
-          <div className="flex justify-between mt-3 px-2 text-[10px] uppercase tracking-widest text-arcade-muted">
-            <span>Player</span>
-            <span>AI</span>
-          </div>
-
-          {/* Score submission — only when player wins */}
-          {winner === "player" && !submitted && (
-            <ScoreSubmit
-              game="pong"
-              score={playerScore}
-              color="cyan"
-              onSubmitted={() => setSubmitted(true)}
-            />
-          )}
+        {/* Player labels */}
+        <div className="flex justify-between mt-3 px-2 font-pixel text-[8px] uppercase tracking-widest text-arcade-muted">
+          <span>Player</span>
+          <span>AI</span>
         </div>
       </div>
     </div>

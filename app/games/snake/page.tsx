@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import ScoreSubmit from "../../components/ScoreSubmit";
+import GameOverModal from "../../components/GameOverModal";
+import { playEat, playGameOver } from "../../lib/sounds";
 import {
   CANVAS_SIZE,
   createInitialState,
@@ -24,7 +25,6 @@ export default function SnakePage() {
   const [started, setStarted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Load persisted high score
   useEffect(() => {
     const saved = localStorage.getItem("snake-highscore");
     if (saved) {
@@ -39,7 +39,6 @@ export default function SnakePage() {
     if (ctx) render(ctx, stateRef.current);
   }, []);
 
-  // Game loop
   useEffect(() => {
     let last = 0;
 
@@ -52,25 +51,30 @@ export default function SnakePage() {
       const next = tick(prev);
       stateRef.current = next;
 
-      if (next.score !== prev.score) setScore(next.score);
+      if (next.score > prev.score) {
+        setScore(next.score);
+        playEat();
+      }
       if (next.highScore !== prev.highScore) {
         setHighScore(next.highScore);
         localStorage.setItem("snake-highscore", String(next.highScore));
       }
-      if (next.gameOver && !prev.gameOver) setGameOver(true);
+      if (next.gameOver && !prev.gameOver) {
+        setGameOver(true);
+        playGameOver();
+      }
 
       draw();
     }
 
     loopRef.current = requestAnimationFrame(loop);
-    draw(); // initial frame
+    draw();
 
     return () => {
       if (loopRef.current !== null) cancelAnimationFrame(loopRef.current);
     };
   }, [draw]);
 
-  // Keyboard input
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -95,75 +99,73 @@ export default function SnakePage() {
   }, [draw]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-arcade-muted hover:text-white text-sm uppercase tracking-widest mb-8 transition-colors"
+        className="inline-flex items-center gap-2 text-arcade-muted hover:text-white font-pixel text-[9px] uppercase tracking-widest mb-8 transition-colors"
       >
         <span>&larr;</span>
-        <span>Back to Games</span>
+        <span>Games</span>
       </Link>
 
-      <div className="bg-arcade-card border border-arcade-green/30 rounded-lg p-6 sm:p-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-arcade-green/10 rounded-lg flex items-center justify-center text-2xl">
-            🐍
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold uppercase tracking-wider text-arcade-green">
-              Snake
-            </h1>
-            <p className="text-arcade-muted text-sm">Arrow keys or WASD to move</p>
-          </div>
+      {/* Game header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🐍</span>
+          <h1 className="font-pixel text-sm uppercase tracking-wider text-arcade-green neon-glow-green">
+            Snake
+          </h1>
+        </div>
+        <p className="text-arcade-muted text-[9px] font-pixel uppercase tracking-wider hidden sm:block">
+          Arrow keys / WASD
+        </p>
+      </div>
+
+      {/* Score bar */}
+      <div className="flex items-center gap-6 mb-4 font-pixel text-[9px] uppercase tracking-wider">
+        <span className="text-arcade-muted">
+          Score <span className="text-arcade-green">{score}</span>
+        </span>
+        <span className="text-arcade-muted">
+          Best <span className="text-arcade-yellow">{highScore}</span>
+        </span>
+      </div>
+
+      {/* Canvas container */}
+      <div className="relative max-w-[400px] mx-auto">
+        <div className="relative border-2 border-arcade-border rounded-xl overflow-hidden crt-screen scanlines">
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
+            className="block w-full h-auto"
+          />
         </div>
 
-        {/* Score bar */}
-        <div className="flex items-center justify-between mb-4 px-1 text-sm uppercase tracking-widest">
-          <div className="flex items-center gap-4">
-            <span className="text-arcade-muted">
-              Score: <span className="text-arcade-green font-bold">{score}</span>
-            </span>
-            <span className="text-arcade-muted">
-              Best: <span className="text-arcade-yellow font-bold">{highScore}</span>
-            </span>
+        {/* Game over modal */}
+        <GameOverModal
+          show={gameOver}
+          title="Game Over"
+          score={score}
+          game="snake"
+          color="green"
+          submitted={submitted}
+          onSubmitted={() => setSubmitted(true)}
+          onRestart={restart}
+        />
+
+        {/* Start hint */}
+        {!started && !gameOver && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl z-10">
+            <p className="font-pixel text-[10px] text-arcade-green neon-glow-green uppercase tracking-wider animate-pulse">
+              Press arrow keys to start
+            </p>
           </div>
-          {gameOver && (
-            <button
-              onClick={restart}
-              className="px-4 py-1.5 bg-arcade-green/15 border border-arcade-green/40 rounded text-arcade-green text-xs uppercase tracking-widest hover:bg-arcade-green/25 transition-colors"
-            >
-              Restart
-            </button>
-          )}
-        </div>
+        )}
 
-        {/* Canvas */}
-        <div className="relative max-w-[400px] mx-auto">
-          <div className="relative border border-arcade-border rounded-lg overflow-hidden scanlines">
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_SIZE}
-              height={CANVAS_SIZE}
-              className="block w-full h-auto"
-            />
-          </div>
-
-          {/* Controls hint (mobile) */}
-          <p className="text-center text-arcade-muted text-xs uppercase tracking-widest mt-4 sm:hidden">
-            Use a keyboard to play
-          </p>
-
-          {/* Score submission */}
-          {gameOver && score > 0 && !submitted && (
-            <ScoreSubmit
-              game="snake"
-              score={score}
-              color="green"
-              onSubmitted={() => setSubmitted(true)}
-            />
-          )}
-        </div>
+        <p className="text-center text-arcade-muted text-[8px] font-pixel uppercase tracking-widest mt-4 sm:hidden">
+          Keyboard required
+        </p>
       </div>
     </div>
   );
