@@ -17,8 +17,12 @@ const BALL_MAX_SPEED = 9;
 
 const WIN_SCORE = 5;
 
-// AI settings
-const AI_REACTION = 0.04; // lerp factor — lower = easier
+// AI settings — difficulty scales with how far the AI is behind
+const AI_BASE_REACTION = 0.03; // lerp factor at easiest
+const AI_MAX_REACTION = 0.09; // lerp factor at hardest
+const AI_BASE_ERROR = 30; // max random offset (px) at easiest
+const AI_MIN_ERROR = 6; // max random offset (px) at hardest
+const AI_SPEED_CAP = 4.5; // max px/frame the paddle can move
 
 // Colors
 const COLOR_BG = "#06060a";
@@ -50,6 +54,7 @@ export interface PongState {
   started: boolean;
   keysDown: Set<string>;
   trail: { x: number; y: number }[];
+  aiError: number; // random offset applied to AI's predicted target
 }
 
 // ---------------------------------------------------------------------------
@@ -81,6 +86,7 @@ export function createInitialState(): PongState {
     started: false,
     keysDown: new Set(),
     trail: [],
+    aiError: 0,
   };
 }
 
@@ -107,6 +113,47 @@ export function keyUp(state: PongState, key: string): PongState {
     return { ...state, keysDown: next };
   }
   return state;
+}
+
+// ---------------------------------------------------------------------------
+// AI — predict where the ball will arrive at the AI paddle's x position
+// ---------------------------------------------------------------------------
+
+function predictBallY(bx: number, by: number, vx: number, vy: number): number {
+  // Only predict when ball is moving towards AI
+  if (vx <= 0) return CANVAS_H / 2;
+
+  const targetX = CANVAS_W - PADDLE_OFFSET - PADDLE_W - BALL_SIZE / 2;
+  const dx = targetX - bx;
+  if (dx <= 0) return by;
+
+  const ticks = dx / vx;
+  let futureY = by + vy * ticks;
+
+  // Simulate wall bounces
+  const min = BALL_SIZE / 2;
+  const max = CANVAS_H - BALL_SIZE / 2;
+  const range = max - min;
+
+  // Normalize into the bounce cycle
+  futureY -= min;
+  if (range > 0) {
+    const cycles = Math.floor(futureY / range);
+    futureY = futureY - cycles * range;
+    if (futureY < 0) futureY = -futureY;
+    // If odd cycle, reflect
+    if (cycles % 2 !== 0) futureY = range - futureY;
+  }
+  futureY += min;
+
+  return clamp(futureY, min, max);
+}
+
+/** Returns a difficulty factor 0..1 based on how far AI is behind */
+function aiDifficulty(playerScore: number, aiScore: number): number {
+  const deficit = playerScore - aiScore; // positive = AI is losing
+  // Scale from 0 (AI leading by 3+) to 1 (AI trailing by 3+)
+  return clamp((deficit + 3) / 6, 0, 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -142,10 +189,26 @@ export function tick(state: PongState, dt: number): PongState {
   }
   playerY = clamp(playerY + moveDir * PADDLE_SPEED, 0, CANVAS_H - PADDLE_H);
 
-  // --- AI paddle movement ---
-  const aiTarget = ballY - PADDLE_H / 2;
-  aiY += (aiTarget - aiY) * AI_REACTION;
-  aiY = clamp(aiY, 0, CANVAS_H - PADDLE_H);
+  // --- AI paddle movement (predictive) ---
+  let aiError = state.aiError;
+  const diff = aiDifficulty(playerScore, aiScore);
+  const reaction = AI_BASE_REACTION + (AI_MAX_REACTION - AI_BASE_REACTION) * diff;
+  const errorRange = AI_BASE_ERROR - (AI_BASE_ERROR - AI_MIN_ERROR) * diff;
+
+  let aiTarget: number;
+  if (ballVX > 0) {
+    // Ball heading toward AI — predict landing Y
+    const predicted = predictBallY(ballX, ballY, ballVX, ballVY);
+    aiTarget = predicted + aiError - PADDLE_H / 2;
+  } else {
+    // Ball heading away — drift toward center
+    aiTarget = CANVAS_H / 2 - PADDLE_H / 2;
+    // Pick a new random error for next approach
+    aiError = (Math.random() - 0.5) * 2 * errorRange;
+  }
+
+  const aiDelta = clamp((aiTarget - aiY) * reaction, -AI_SPEED_CAP, AI_SPEED_CAP);
+  aiY = clamp(aiY + aiDelta, 0, CANVAS_H - PADDLE_H);
 
   // --- Ball trail ---
   trail = [...trail, { x: ballX, y: ballY }].slice(-12);
@@ -244,6 +307,7 @@ export function tick(state: PongState, dt: number): PongState {
     paused,
     pauseTimer,
     trail,
+    aiError,
   };
 }
 
