@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useUser } from "./UserProvider";
 
 export default function Navbar() {
+  const { username } = useUser();
+
   return (
     <nav className="border-b border-arcade-border bg-arcade-darker/90 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -29,12 +34,17 @@ export default function Navbar() {
             Leaderboard
           </Link>
           <div className="h-4 w-px bg-arcade-border hidden sm:block" />
+          {username && (
+            <span className="text-arcade-cyan text-xs font-mono uppercase tracking-wider truncate max-w-[120px]">
+              {username}
+            </span>
+          )}
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-arcade-green opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-arcade-green" />
             </span>
-            <span className="text-arcade-green text-xs font-mono uppercase tracking-wider">
+            <span className="text-arcade-green text-xs font-mono uppercase tracking-wider hidden sm:inline">
               Online
             </span>
           </div>
