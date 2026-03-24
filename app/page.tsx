@@ -11,12 +11,12 @@ const games = [
     href: "/games/snake",
     color: "green" as const,
     thumbnail: <SnakeThumbnail />,
-    tags: ["Classic", "Single Player"],
+    tags: ["Classic", "1P"],
   },
   {
     title: "Pong",
     description:
-      "The classic paddle game. First to 10 points wins. Can you beat the AI?",
+      "The classic paddle game. First to 5 points wins. Can you beat the AI?",
     href: "/games/pong",
     color: "cyan" as const,
     thumbnail: <PongThumbnail />,
@@ -29,7 +29,7 @@ const games = [
     href: "/games/breakout",
     color: "purple" as const,
     thumbnail: <BreakoutThumbnail />,
-    tags: ["Classic", "Single Player"],
+    tags: ["Classic", "1P"],
   },
 ];
 
@@ -65,26 +65,26 @@ export default function Home() {
           </div>
 
           <div className="relative">
-            <p className="text-arcade-muted text-xs uppercase tracking-[0.3em] mb-4">
+            <p className="font-pixel text-[9px] text-arcade-muted uppercase tracking-[0.3em] mb-6">
               Browser-Based Retro Gaming
             </p>
 
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold uppercase tracking-wider mb-6 neon-glow marquee-flicker">
+            <h1 className="font-pixel text-3xl sm:text-4xl md:text-5xl uppercase tracking-wider mb-6 neon-glow marquee-flicker">
               Arcade
             </h1>
 
-            <p className="text-arcade-muted text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
+            <p className="text-arcade-muted text-sm sm:text-base max-w-md mx-auto leading-relaxed">
               Classic games, reimagined for the browser. Pick a game and start
               playing — no downloads, no installs.
             </p>
 
-            <div className="mt-8 flex items-center justify-center gap-6 text-xs uppercase tracking-widest text-arcade-muted">
+            <div className="mt-8 flex items-center justify-center gap-6 font-pixel text-[8px] uppercase tracking-widest text-arcade-muted">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-arcade-green opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-arcade-green" />
                 </span>
-                <span>{games.length} games available</span>
+                <span>{games.length} games live</span>
               </div>
               <div className="h-3 w-px bg-arcade-border" />
               <span>Free to play</span>
@@ -92,17 +92,16 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Gradient fade into content */}
         <div className="h-px bg-gradient-to-r from-transparent via-arcade-border to-transparent" />
       </section>
 
       {/* Games section */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-sm uppercase tracking-widest text-arcade-muted">
+        <div className="flex items-center gap-4 mb-8">
+          <h2 className="font-pixel text-[10px] uppercase tracking-widest text-arcade-muted">
             All Games
           </h2>
-          <div className="h-px flex-1 bg-arcade-border ml-4" />
+          <div className="h-px flex-1 bg-arcade-border" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -115,10 +114,10 @@ export default function Home() {
       {/* Footer */}
       <footer className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="h-px bg-gradient-to-r from-transparent via-arcade-border to-transparent mb-8" />
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs uppercase tracking-widest text-arcade-muted">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 font-pixel text-[8px] uppercase tracking-widest text-arcade-muted">
           <span>Insert Coin to Continue</span>
-          <span className="text-arcade-purple/50">
-            Built with Next.js + Tailwind
+          <span className="text-arcade-purple/40">
+            Next.js + Tailwind
           </span>
         </div>
       </footer>

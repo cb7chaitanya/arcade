@@ -11,52 +11,52 @@ export interface GameCardProps {
 
 const colorMap = {
   purple: {
-    border: "border-arcade-purple/20 hover:border-arcade-purple/50",
+    border: "border-arcade-purple/15 hover:border-arcade-purple/60",
     text: "text-arcade-purple",
     btnBg: "bg-arcade-purple",
-    btnHover: "group-hover:bg-arcade-purple",
-    glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.25),0_0_60px_rgba(168,85,247,0.1)]",
     ping: "bg-arcade-purple",
+    tagBorder: "border-arcade-purple/20",
   },
   pink: {
-    border: "border-arcade-pink/20 hover:border-arcade-pink/50",
+    border: "border-arcade-pink/15 hover:border-arcade-pink/60",
     text: "text-arcade-pink",
     btnBg: "bg-arcade-pink",
-    btnHover: "group-hover:bg-arcade-pink",
-    glow: "group-hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(236,72,153,0.25),0_0_60px_rgba(236,72,153,0.1)]",
     ping: "bg-arcade-pink",
+    tagBorder: "border-arcade-pink/20",
   },
   cyan: {
-    border: "border-arcade-cyan/20 hover:border-arcade-cyan/50",
+    border: "border-arcade-cyan/15 hover:border-arcade-cyan/60",
     text: "text-arcade-cyan",
     btnBg: "bg-arcade-cyan",
-    btnHover: "group-hover:bg-arcade-cyan",
-    glow: "group-hover:shadow-[0_0_30px_rgba(6,182,212,0.2)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(6,182,212,0.25),0_0_60px_rgba(6,182,212,0.1)]",
     ping: "bg-arcade-cyan",
+    tagBorder: "border-arcade-cyan/20",
   },
   green: {
-    border: "border-arcade-green/20 hover:border-arcade-green/50",
+    border: "border-arcade-green/15 hover:border-arcade-green/60",
     text: "text-arcade-green",
     btnBg: "bg-arcade-green",
-    btnHover: "group-hover:bg-arcade-green",
-    glow: "group-hover:shadow-[0_0_30px_rgba(34,197,94,0.2)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(34,197,94,0.25),0_0_60px_rgba(34,197,94,0.1)]",
     ping: "bg-arcade-green",
+    tagBorder: "border-arcade-green/20",
   },
   yellow: {
-    border: "border-arcade-yellow/20 hover:border-arcade-yellow/50",
+    border: "border-arcade-yellow/15 hover:border-arcade-yellow/60",
     text: "text-arcade-yellow",
     btnBg: "bg-arcade-yellow",
-    btnHover: "group-hover:bg-arcade-yellow",
-    glow: "group-hover:shadow-[0_0_30px_rgba(234,179,8,0.2)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(234,179,8,0.25),0_0_60px_rgba(234,179,8,0.1)]",
     ping: "bg-arcade-yellow",
+    tagBorder: "border-arcade-yellow/20",
   },
   orange: {
-    border: "border-arcade-orange/20 hover:border-arcade-orange/50",
+    border: "border-arcade-orange/15 hover:border-arcade-orange/60",
     text: "text-arcade-orange",
     btnBg: "bg-arcade-orange",
-    btnHover: "group-hover:bg-arcade-orange",
-    glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.2)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.25),0_0_60px_rgba(249,115,22,0.1)]",
     ping: "bg-arcade-orange",
+    tagBorder: "border-arcade-orange/20",
   },
 };
 
@@ -73,7 +73,7 @@ export default function GameCard({
   return (
     <Link href={href} className="group block">
       <div
-        className={`relative bg-arcade-card border ${c.border} rounded-xl overflow-hidden transition-all duration-300 group-hover:-translate-y-1.5 ${c.glow}`}
+        className={`relative bg-arcade-card border ${c.border} rounded-xl overflow-hidden transition-all duration-300 group-hover:-translate-y-2 ${c.glow}`}
       >
         {/* Thumbnail area */}
         <div className="relative aspect-[4/3] bg-arcade-darker overflow-hidden scanlines">
@@ -82,17 +82,14 @@ export default function GameCard({
           </div>
 
           {/* Play button overlay */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50">
             <div className="relative">
-              {/* Ping ring */}
               <div
                 className={`absolute inset-0 rounded-full ${c.ping} opacity-0 group-hover:opacity-100 play-ping`}
               />
-              {/* Button */}
               <div
-                className={`relative w-14 h-14 rounded-full ${c.btnBg} flex items-center justify-center shadow-lg`}
+                className={`relative w-14 h-14 rounded-full ${c.btnBg} flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300`}
               >
-                {/* Play triangle */}
                 <svg
                   viewBox="0 0 24 24"
                   fill="currentColor"
@@ -107,15 +104,13 @@ export default function GameCard({
 
         {/* Card info */}
         <div className="p-5">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h3
-              className={`text-base font-bold uppercase tracking-wider ${c.text}`}
-            >
-              {title}
-            </h3>
-          </div>
+          <h3
+            className={`font-pixel text-[11px] uppercase tracking-wider ${c.text} mb-2`}
+          >
+            {title}
+          </h3>
 
-          <p className="text-arcade-muted text-sm leading-relaxed mb-3">
+          <p className="text-arcade-muted text-xs leading-relaxed mb-3">
             {description}
           </p>
 
@@ -125,7 +120,7 @@ export default function GameCard({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[10px] uppercase tracking-widest text-arcade-muted bg-arcade-darker px-2 py-1 rounded"
+                  className={`text-[9px] font-pixel uppercase tracking-wider text-arcade-muted bg-arcade-darker border ${c.tagBorder} px-2 py-1 rounded`}
                 >
                   {tag}
                 </span>

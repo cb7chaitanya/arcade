@@ -18,24 +18,33 @@ const GAMES = [
 
 type GameId = (typeof GAMES)[number]["id"];
 
-const colorMap: Record<string, { tab: string; activeTab: string; rank: string; border: string }> = {
+const colorMap: Record<string, {
+  tab: string;
+  activeTab: string;
+  rank: string;
+  border: string;
+  glow: string;
+}> = {
   green: {
     tab: "text-arcade-muted hover:text-arcade-green",
     activeTab: "text-arcade-green border-arcade-green",
     rank: "text-arcade-green",
     border: "border-arcade-green/30",
+    glow: "neon-glow-green",
   },
   cyan: {
     tab: "text-arcade-muted hover:text-arcade-cyan",
     activeTab: "text-arcade-cyan border-arcade-cyan",
     rank: "text-arcade-cyan",
     border: "border-arcade-cyan/30",
+    glow: "neon-glow-cyan",
   },
   purple: {
     tab: "text-arcade-muted hover:text-arcade-purple",
     activeTab: "text-arcade-purple border-arcade-purple",
     rank: "text-arcade-purple",
     border: "border-arcade-purple/30",
+    glow: "neon-glow",
   },
 };
 
@@ -66,20 +75,20 @@ export default function LeaderboardPage() {
   const c = colorMap[activeConfig.color];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-arcade-muted hover:text-white text-sm uppercase tracking-widest mb-8 transition-colors"
+        className="inline-flex items-center gap-2 text-arcade-muted hover:text-white font-pixel text-[9px] uppercase tracking-widest mb-8 transition-colors"
       >
         <span>&larr;</span>
-        <span>Back to Games</span>
+        <span>Games</span>
       </Link>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold uppercase tracking-wider neon-glow mb-2">
+        <h1 className={`font-pixel text-lg uppercase tracking-wider ${c.rank} ${c.glow} mb-2`}>
           Leaderboard
         </h1>
-        <p className="text-arcade-muted text-sm">
+        <p className="text-arcade-muted text-xs">
           Top scores across all games
         </p>
       </div>
@@ -93,13 +102,13 @@ export default function LeaderboardPage() {
             <button
               key={game.id}
               onClick={() => setActiveGame(game.id)}
-              className={`px-4 py-3 text-xs uppercase tracking-widest transition-colors border-b-2 ${
+              className={`px-4 py-3 font-pixel text-[8px] uppercase tracking-widest transition-all border-b-2 ${
                 isActive
-                  ? gc.activeTab
+                  ? `${gc.activeTab}`
                   : `${gc.tab} border-transparent`
               }`}
             >
-              <span className="mr-2">{game.emoji}</span>
+              <span className="mr-1.5">{game.emoji}</span>
               {game.label}
             </button>
           );
@@ -107,9 +116,9 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Table */}
-      <div className={`bg-arcade-card border ${c.border} rounded-lg overflow-hidden`}>
+      <div className={`bg-arcade-card border ${c.border} rounded-xl overflow-hidden`}>
         {/* Header */}
-        <div className="grid grid-cols-[3rem_1fr_5rem_8rem] gap-4 px-4 py-3 border-b border-arcade-border text-[10px] uppercase tracking-widest text-arcade-muted">
+        <div className="grid grid-cols-[3rem_1fr_5rem_7rem] gap-4 px-4 py-3 border-b border-arcade-border font-pixel text-[7px] uppercase tracking-widest text-arcade-muted">
           <span>Rank</span>
           <span>Player</span>
           <span className="text-right">Score</span>
@@ -117,41 +126,42 @@ export default function LeaderboardPage() {
         </div>
 
         {loading ? (
-          <div className="px-4 py-12 text-center text-arcade-muted text-sm">
-            Loading...
+          <div className="px-4 py-16 text-center">
+            <p className="font-pixel text-[9px] text-arcade-muted uppercase tracking-wider animate-pulse">
+              Loading...
+            </p>
           </div>
         ) : entries.length === 0 ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-arcade-muted text-sm mb-1">No scores yet</p>
-            <p className="text-arcade-muted text-xs">
-              Play{" "}
-              <Link href={`/games/${activeGame}`} className={`${c.rank} hover:underline`}>
-                {activeConfig.label}
-              </Link>{" "}
-              and be the first!
+          <div className="px-4 py-16 text-center">
+            <p className="font-pixel text-[9px] text-arcade-muted uppercase tracking-wider mb-3">
+              No scores yet
             </p>
+            <Link
+              href={`/games/${activeGame}`}
+              className={`neon-btn neon-btn-${activeConfig.color}`}
+            >
+              Play {activeConfig.label}
+            </Link>
           </div>
         ) : (
           <div>
             {entries.slice(0, 20).map((entry, i) => (
               <div
                 key={`${entry.username}-${entry.date}`}
-                className={`grid grid-cols-[3rem_1fr_5rem_8rem] gap-4 px-4 py-3 items-center ${
-                  i !== entries.length - 1 ? "border-b border-arcade-border/50" : ""
-                } ${i < 3 ? "bg-arcade-darker/50" : ""}`}
+                className={`grid grid-cols-[3rem_1fr_5rem_7rem] gap-4 px-4 py-3 items-center transition-colors hover:bg-arcade-darker/50 ${
+                  i !== Math.min(entries.length, 20) - 1 ? "border-b border-arcade-border/30" : ""
+                } ${i < 3 ? "bg-arcade-darker/30" : ""}`}
               >
-                <span
-                  className={`text-sm font-bold ${i < 3 ? c.rank : "text-arcade-muted"}`}
-                >
-                  {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                <span className={`font-pixel text-[10px] ${i < 3 ? c.rank : "text-arcade-muted"}`}>
+                  {i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}`}
                 </span>
                 <span className="text-sm text-white truncate">
                   {entry.username}
                 </span>
-                <span className="text-sm font-bold text-right text-white">
+                <span className="font-pixel text-[10px] text-right text-white">
                   {entry.score.toLocaleString()}
                 </span>
-                <span className="text-xs text-arcade-muted text-right hidden sm:block">
+                <span className="text-[10px] text-arcade-muted text-right hidden sm:block">
                   {new Date(entry.date).toLocaleDateString()}
                 </span>
               </div>
